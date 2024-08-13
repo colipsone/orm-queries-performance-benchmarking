@@ -36,7 +36,6 @@ public class DapperWithSqlKata : IDisposable, IAsyncDisposable
         _compiledQuery.NamedBindings["@p0"] = orderDate; 
 
         var orderDictionary = new Dictionary<int, Order>();
-        var orderItemSets = new Dictionary<int, HashSet<int>>();
 
         await _connection.QueryAsync<Order, Customer, OrderItem, ShippingAddress, Order>(
             _compiledQuery.Sql,
@@ -52,10 +51,9 @@ public class DapperWithSqlKata : IDisposable, IAsyncDisposable
                     existingOrder.OrderItems = [];
                     existingOrder.ShippingAddress = shippingAddress;
                     orderDictionary[order.OrderId] = existingOrder;
-                    orderItemSets[order.OrderId] = [];
                 }
 
-                if (!orderItemSets[order.OrderId].Add(orderItem.OrderItemId))
+                if (existingOrder.OrderItems.Any(oi => oi.OrderItemId == orderItem.OrderItemId))
                 {
                     return existingOrder;
                 }
